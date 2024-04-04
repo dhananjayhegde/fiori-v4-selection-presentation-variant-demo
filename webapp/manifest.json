@@ -1,0 +1,208 @@
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "zdh.om.zdhom",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:lrop",
+      "version": "1.13.1",
+      "toolsId": "47541def-c3b5-437f-acb0-769297a4cad2"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata4/sap/zdh_sb_ui_v4_ordermanagement/srvd/sap/zdh_sd_ordermanagement/0001/",
+        "type": "OData",
+        "settings": {
+          "annotations": [
+            "annotation"
+          ],
+          "localUri": "localService/metadata.xml",
+          "odataVersion": "4.0"
+        }
+      },
+      "annotation": {
+        "type": "ODataAnnotation",
+        "uri": "annotations/annotation.xml",
+        "settings": {
+          "localUri": "annotations/annotation.xml"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "ZDHOrderItem-ZDHDisplay": {
+          "semanticObject": "ZDHOrderItem",
+          "action": "ZDHDisplay",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.120.10",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ushell": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "zdh.om.zdhom.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "@i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      }
+    },
+    "resources": {
+      "css": []
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "OrderItemList",
+          "target": "OrderItemList"
+        },
+        {
+          "pattern": "OrderItem({key}):?query:",
+          "name": "OrderItemObjectPage",
+          "target": "OrderItemObjectPage"
+        }
+      ],
+      "targets": {
+        "OrderItemList": {
+          "type": "Component",
+          "id": "OrderItemList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/OrderItem",
+              "views": {
+                "paths": [
+                  {
+                    "key": "highValueItemTab",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#spvMyItems"
+                  },
+                  {
+                    "key": "lowValueItemTab",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#spvAllItems"
+                  }
+                ],
+                "showCounts": true
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem#liMyItems": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable",
+                    "quickVariantSelection": {
+                      "paths": [
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#svExpesniveItems"
+                        },
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#svCheapItems"
+                        }
+                      ],
+                      "hideTableTitle": true,
+                      "showCounts": true
+                    }
+                  }
+                },
+                "@com.sap.vocabularies.UI.v1.LineItem#liAllItems": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable",
+                    "quickVariantSelection": {
+                      "paths": [
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#svExpesniveItems"
+                        },
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#svCheapItems"
+                        }
+                      ],
+                      "hideTableTitle": true,
+                      "showCounts": true
+                    }
+                  }
+                }
+              },
+              "variantManagement": "Page",
+              "navigation": {
+                "OrderItem": {
+                  "detail": {
+                    "route": "OrderItemObjectPage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "OrderItemObjectPage": {
+          "type": "Component",
+          "id": "OrderItemObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/OrderItem"
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fiori": {
+    "registrationIds": [],
+    "archeType": "transactional"
+  }
+}
