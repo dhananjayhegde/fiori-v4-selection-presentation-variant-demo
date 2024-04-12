@@ -105,8 +105,16 @@
     "resources": {
       "css": []
     },
+    "extends": {
+      "extensions": {
+        "sap.ui.controllerExtensions": {
+          "sap.fe.templates.ListReport.ListReportController": {
+            "controllerName" : "zdh.om.zdhom.ext.controller.ListReportExtension"
+          }
+        }
+      }
+    },
     "routing": {
-      "config": {},
       "routes": [
         {
           "pattern": ":?query:",
@@ -156,6 +164,15 @@
                       "hideTableTitle": true,
                       "showCounts": true
                     }
+                  },
+                  "actions": {
+                    "CustomKeepMyItems": {
+                      "press": ".extension.zdh.om.zdhom.ext.controller.ListReportExtension.onCustomKeepButtonClick",
+                      "visible": true,
+                      "enabled": true,
+                      "requiresSelection": true,
+                      "text": "Keep (custom)"
+                    }
                   }
                 },
                 "@com.sap.vocabularies.UI.v1.LineItem#liAllItems": {
@@ -172,6 +189,15 @@
                       ],
                       "hideTableTitle": true,
                       "showCounts": true
+                    }
+                  },
+                  "actions": {
+                    "CustomKeepAllItems": {
+                      "press": ".extension.zdh.om.zdhom.ext.controller.ListReportExtension.onCustomKeepButtonClick",
+                      "visible": true,
+                      "enabled": true,
+                      "requiresSelection": true,
+                      "text": "Keep (custom)"
                     }
                   }
                 }

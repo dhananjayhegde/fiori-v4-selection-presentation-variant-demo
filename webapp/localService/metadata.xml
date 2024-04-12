@@ -63,20 +63,58 @@
                 <Property Name="NetPrice" Type="Edm.Decimal" Nullable="false" Precision="12" Scale="variable"/>
                 <Property Name="ItemIsExpensive" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="Currency" Type="Edm.String" Nullable="false" MaxLength="5"/>
+                <Property Name="DeliveryDate" Type="Edm.Date"/>
                 <Property Name="Status" Type="Edm.String" Nullable="false" MaxLength="2"/>
+                <Property Name="Requestor" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="IsMyItem" Type="Edm.String" Nullable="false" MaxLength="1"/>
                 <Property Name="LocalLastChangedByUser" Type="Edm.String" Nullable="false" MaxLength="12"/>
                 <Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="__OperationControl" Type="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemOperationControl"/>
+                <Property Name="SAP__Messages" Type="Collection(com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.SAP__Message)" Nullable="false"/>
             </EntityType>
+            <ComplexType Name="OrderItemOperationControl">
+                <Property Name="CancelOrder" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="KeepOrder" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="RescheduleDelivery" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="ValidateAction" Type="Edm.Boolean" Nullable="false"/>
+            </ComplexType>
+            <ComplexType Name="SAP__Message">
+                <Property Name="code" Type="Edm.String" Nullable="false"/>
+                <Property Name="message" Type="Edm.String" Nullable="false"/>
+                <Property Name="target" Type="Edm.String"/>
+                <Property Name="additionalTargets" Type="Collection(Edm.String)" Nullable="false"/>
+                <Property Name="transition" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="numericSeverity" Type="Edm.Byte" Nullable="false"/>
+                <Property Name="longtextUrl" Type="Edm.String"/>
+            </ComplexType>
+            <Action Name="CancelOrder" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType" Nullable="false"/>
+                <Parameter Name="Justification" Type="Edm.String" Nullable="false" MaxLength="200"/>
+            </Action>
+            <Action Name="RescheduleDelivery" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType" Nullable="false"/>
+                <Parameter Name="Justification" Type="Edm.String" Nullable="false" MaxLength="200"/>
+                <Parameter Name="DeliveryDate" Type="Edm.Date" Nullable="true"/>
+            </Action>
+            <Action Name="KeepOrder" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType" Nullable="false"/>
+                <Parameter Name="Justification" Type="Edm.String" Nullable="false" MaxLength="200"/>
+            </Action>
+            <Action Name="ValidateAction" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType" Nullable="false"/>
+            </Action>
             <EntityContainer Name="Container">
                 <EntitySet Name="OrderItem" EntityType="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType"/>
             </EntityContainer>
             <Annotations Target="SAP__self.OrderItemType/OrderId">
+                <Annotation Term="SAP__core.Computed"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.Label" String="Purchasing Document"/>
                 <Annotation Term="SAP__common.Heading" String="Pur. Doc."/>
                 <Annotation Term="SAP__common.QuickInfo" String="Purchasing Document Number"/>
             </Annotations>
             <Annotations Target="SAP__self.OrderItemType/ItemNo">
+                <Annotation Term="SAP__core.Computed"/>
                 <Annotation Term="SAP__common.IsDigitSequence"/>
                 <Annotation Term="SAP__common.Label" String="Item"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Item Number of Purchasing Document"/>
@@ -105,10 +143,32 @@
                 <Annotation Term="SAP__common.Label" String="Status"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Order Item Status"/>
             </Annotations>
+            <Annotations Target="SAP__self.OrderItemType/Requestor">
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Requestor"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Requestor of order item"/>
+            </Annotations>
             <Annotations Target="SAP__self.OrderItemType/LocalLastChangedByUser">
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.Label" String="Changed By"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Local Instance Last Changed By User"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemType/__OperationControl">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__UI.HiddenFilter"/>
+                <Annotation Term="SAP__UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="SAP__self.CancelOrder(SAP__self.OrderItemType)">
+                <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/CancelOrder"/>
+            </Annotations>
+            <Annotations Target="SAP__self.RescheduleDelivery(SAP__self.OrderItemType)">
+                <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/RescheduleDelivery"/>
+            </Annotations>
+            <Annotations Target="SAP__self.KeepOrder(SAP__self.OrderItemType)">
+                <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/KeepOrder"/>
+            </Annotations>
+            <Annotations Target="SAP__self.ValidateAction(SAP__self.OrderItemType)">
+                <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/ValidateAction"/>
             </Annotations>
             <Annotations Target="SAP__self.OrderItemType">
                 <Annotation Term="SAP__common.Label" String="Order Item"/>
@@ -134,13 +194,32 @@
                             <PropertyValue Property="Label" String="Status"/>
                             <PropertyValue Property="Value" Path="Status"/>
                         </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Label" String="Requestor"/>
+                            <PropertyValue Property="Value" Path="Requestor"/>
+                        </Record>
                     </Collection>
                 </Annotation>
-                <Annotation Term="SAP__UI.LineItem" Qualifier="liCheapItems">
+                <Annotation Term="SAP__UI.LineItem" Qualifier="liAllItems">
                     <Collection>
                         <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Label" String="Item No."/>
                             <PropertyValue Property="Value" Path="FormattedItemNo"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataFieldForAction">
+                            <PropertyValue Property="Label" String="Cancel"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.CancelOrder(com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType)"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="SAP__UI.OperationGroupingType/ChangeSet"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataFieldForAction">
+                            <PropertyValue Property="Label" String="Keep"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.KeepOrder(com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType)"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="SAP__UI.OperationGroupingType/ChangeSet"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataFieldForAction">
+                            <PropertyValue Property="Label" String="Reschedule Delivery"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.RescheduleDelivery(com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType)"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="SAP__UI.OperationGroupingType/ChangeSet"/>
                         </Record>
                         <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Label" String="Description (aff)"/>
@@ -154,13 +233,32 @@
                             <PropertyValue Property="Label" String="Net Price (aff)"/>
                             <PropertyValue Property="Value" Path="NetPrice"/>
                         </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Label" String="Requestor"/>
+                            <PropertyValue Property="Value" Path="Requestor"/>
+                        </Record>
                     </Collection>
                 </Annotation>
-                <Annotation Term="SAP__UI.LineItem" Qualifier="liExpensiveItems">
+                <Annotation Term="SAP__UI.LineItem" Qualifier="liMyItems">
                     <Collection>
                         <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Label" String="Item No."/>
                             <PropertyValue Property="Value" Path="FormattedItemNo"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataFieldForAction">
+                            <PropertyValue Property="Label" String="Cancel"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.CancelOrder(com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType)"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="SAP__UI.OperationGroupingType/ChangeSet"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataFieldForAction">
+                            <PropertyValue Property="Label" String="Keep"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.KeepOrder(com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType)"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="SAP__UI.OperationGroupingType/ChangeSet"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataFieldForAction">
+                            <PropertyValue Property="Label" String="Reschedule Delivery"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.RescheduleDelivery(com.sap.gateway.srvd.zdh_sd_ordermanagement.v0001.OrderItemType)"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="SAP__UI.OperationGroupingType/ChangeSet"/>
                         </Record>
                         <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Label" String="Description (exp)"/>
@@ -178,52 +276,71 @@
                             <PropertyValue Property="Label" String="Net Price (exp)"/>
                             <PropertyValue Property="Value" Path="NetPrice"/>
                         </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Label" String="Delivery Date"/>
+                            <PropertyValue Property="Value" Path="DeliveryDate"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Label" String="Delivery Date"/>
+                            <PropertyValue Property="Value" Path="DeliveryDate"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Label" String="Requestor"/>
+                            <PropertyValue Property="Value" Path="Requestor"/>
+                        </Record>
                     </Collection>
                 </Annotation>
-                <Annotation Term="SAP__UI.PresentationVariant" Qualifier="pvCheapItems">
+                <Annotation Term="SAP__UI.PresentationVariant" Qualifier="pvAllItems">
                     <Record>
-                        <PropertyValue Property="Text" String="Affordable (pv)"/>
+                        <PropertyValue Property="Text" String="All Items (pv)"/>
                         <PropertyValue Property="Visualizations">
                             <Collection>
-                                <AnnotationPath>@SAP__UI.LineItem#liCheapItems</AnnotationPath>
+                                <AnnotationPath>@SAP__UI.LineItem#liAllItems</AnnotationPath>
                             </Collection>
                         </PropertyValue>
                     </Record>
                 </Annotation>
-                <Annotation Term="SAP__UI.PresentationVariant" Qualifier="pvExpensiveItems">
+                <Annotation Term="SAP__UI.PresentationVariant" Qualifier="pvMyItems">
                     <Record>
-                        <PropertyValue Property="Text" String="Expensive (pv)"/>
+                        <PropertyValue Property="Text" String="My Items (pv)"/>
                         <PropertyValue Property="Visualizations">
                             <Collection>
-                                <AnnotationPath>@SAP__UI.LineItem#liExpensiveItems</AnnotationPath>
+                                <AnnotationPath>@SAP__UI.LineItem#liMyItems</AnnotationPath>
                             </Collection>
                         </PropertyValue>
                     </Record>
                 </Annotation>
-                <Annotation Term="SAP__UI.SelectionPresentationVariant" Qualifier="spvCheapItems">
+                <Annotation Term="SAP__UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>OrderId</PropertyPath>
+                        <PropertyPath>Status</PropertyPath>
+                        <PropertyPath>Requestor</PropertyPath>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="SAP__UI.SelectionPresentationVariant" Qualifier="spvAllItems">
                     <Record>
-                        <PropertyValue Property="Text" String="Affordable (spv)"/>
-                        <PropertyValue Property="ID" String="idSPVCheapItems"/>
-                        <PropertyValue Property="SelectionVariant" Path="@SAP__UI.SelectionVariant#svCheapItems"/>
-                        <PropertyValue Property="PresentationVariant" Path="@SAP__UI.PresentationVariant#pvCheapItems"/>
+                        <PropertyValue Property="Text" String="All Items (spv)"/>
+                        <PropertyValue Property="ID" String="idSPVAllItems"/>
+                        <PropertyValue Property="SelectionVariant" Path="@SAP__UI.SelectionVariant#svAllItems"/>
+                        <PropertyValue Property="PresentationVariant" Path="@SAP__UI.PresentationVariant#pvAllItems"/>
                     </Record>
                 </Annotation>
-                <Annotation Term="SAP__UI.SelectionPresentationVariant" Qualifier="spvExpesiveItems">
+                <Annotation Term="SAP__UI.SelectionPresentationVariant" Qualifier="spvMyItems">
                     <Record>
-                        <PropertyValue Property="Text" String="Expensive (spv)"/>
-                        <PropertyValue Property="ID" String="idSPVExpensiveItems"/>
-                        <PropertyValue Property="SelectionVariant" Path="@SAP__UI.SelectionVariant#svExpensiveItems"/>
-                        <PropertyValue Property="PresentationVariant" Path="@SAP__UI.PresentationVariant#pvExpensiveItems"/>
+                        <PropertyValue Property="Text" String="My Items (spv)"/>
+                        <PropertyValue Property="ID" String="idSPVMyItems"/>
+                        <PropertyValue Property="SelectionVariant" Path="@SAP__UI.SelectionVariant#svMyItems"/>
+                        <PropertyValue Property="PresentationVariant" Path="@SAP__UI.PresentationVariant#pvMyItems"/>
                     </Record>
                 </Annotation>
                 <Annotation Term="SAP__UI.SelectionVariant" Qualifier="svCheapItems">
                     <Record>
-                        <PropertyValue Property="Text" String="Affordable (sv)"/>
+                        <PropertyValue Property="Text" String="Aged (sv)"/>
                     </Record>
                 </Annotation>
-                <Annotation Term="SAP__UI.SelectionVariant" Qualifier="svExpensiveItems">
+                <Annotation Term="SAP__UI.SelectionVariant" Qualifier="svExpesniveItems">
                     <Record>
-                        <PropertyValue Property="Text" String="Expensive (sv)"/>
+                        <PropertyValue Property="Text" String="Excess (sv)"/>
                         <PropertyValue Property="SelectOptions">
                             <Collection>
                                 <Record Type="SAP__UI.SelectOptionType">
@@ -242,11 +359,56 @@
                         </PropertyValue>
                     </Record>
                 </Annotation>
+                <Annotation Term="SAP__UI.SelectionVariant" Qualifier="svAllItems">
+                    <Record>
+                        <PropertyValue Property="Text" String="All Items (sv)"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__UI.SelectionVariant" Qualifier="svMyItems">
+                    <Record>
+                        <PropertyValue Property="Text" String="My Items (sv)"/>
+                        <PropertyValue Property="SelectOptions">
+                            <Collection>
+                                <Record Type="SAP__UI.SelectOptionType">
+                                    <PropertyValue Property="PropertyName" PropertyPath="IsMyItem"/>
+                                    <PropertyValue Property="Ranges">
+                                        <Collection>
+                                            <Record Type="SAP__UI.SelectionRangeType">
+                                                <PropertyValue Property="Sign" EnumMember="SAP__UI.SelectionRangeSignType/I"/>
+                                                <PropertyValue Property="Option" EnumMember="SAP__UI.SelectionRangeOptionType/EQ"/>
+                                                <PropertyValue Property="Low" String="X"/>
+                                            </Record>
+                                        </Collection>
+                                    </PropertyValue>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__common.Messages" Path="SAP__Messages"/>
             </Annotations>
             <Annotations Target="SAP__self.Container/OrderItem">
                 <Annotation Term="SAP__capabilities.SearchRestrictions">
                     <Record>
                         <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.FilterRestrictions">
+                    <Record>
+                        <PropertyValue Property="NonFilterableProperties">
+                            <Collection>
+                                <PropertyPath>__OperationControl</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.SortRestrictions">
+                    <Record>
+                        <PropertyValue Property="NonSortableProperties">
+                            <Collection>
+                                <PropertyPath>__OperationControl</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
                     </Record>
                 </Annotation>
                 <Annotation Term="SAP__capabilities.InsertRestrictions">
@@ -271,22 +433,6 @@
                 </Annotation>
                 <Annotation Term="SAP__core.OptimisticConcurrency">
                     <Collection/>
-                </Annotation>
-                <Annotation Term="SAP__capabilities.FilterRestrictions">
-                    <Record>
-                        <PropertyValue Property="FilterExpressionRestrictions">
-                            <Collection>
-                                <Record>
-                                    <PropertyValue Property="Property" PropertyPath="Quantity"/>
-                                    <PropertyValue Property="AllowedExpressions" String="MultiValue"/>
-                                </Record>
-                                <Record>
-                                    <PropertyValue Property="Property" PropertyPath="NetPrice"/>
-                                    <PropertyValue Property="AllowedExpressions" String="MultiValue"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
                 </Annotation>
             </Annotations>
             <Annotations Target="SAP__self.Container">
@@ -365,9 +511,66 @@
                 <Annotation Term="SAP__common.Label" String="Truth Value"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Truth Value: True/False"/>
             </Annotations>
+            <Annotations Target="SAP__self.OrderItemType/DeliveryDate">
+                <Annotation Term="SAP__common.Label" String="Delivery Date"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Order Delivery Date"/>
+            </Annotations>
             <Annotations Target="SAP__self.OrderItemType/LastChangedAt">
                 <Annotation Term="SAP__common.Label" String="Changed On"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Last Change Date Time"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemType/__OperationControl/CancelOrder">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemType/__OperationControl/KeepOrder">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemType/__OperationControl/RescheduleDelivery">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemType/__OperationControl/ValidateAction">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemOperationControl/CancelOrder">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemOperationControl/KeepOrder">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemOperationControl/RescheduleDelivery">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.OrderItemOperationControl/ValidateAction">
+                <Annotation Term="SAP__common.Label" String="Dyn. Action Control"/>
+                <Annotation Term="SAP__common.Heading" String="Dynamic Action Control"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Dynamic Action Property"/>
+            </Annotations>
+            <Annotations Target="SAP__self.CancelOrder(SAP__self.OrderItemType)/Justification">
+                <Annotation Term="SAP__common.Label" String="Justification Text"/>
+            </Annotations>
+            <Annotations Target="SAP__self.RescheduleDelivery(SAP__self.OrderItemType)/Justification">
+                <Annotation Term="SAP__common.Label" String="Justification Text"/>
+            </Annotations>
+            <Annotations Target="SAP__self.RescheduleDelivery(SAP__self.OrderItemType)/DeliveryDate">
+                <Annotation Term="SAP__common.Label" String="Delivery Date"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Order Delivery Date"/>
+            </Annotations>
+            <Annotations Target="SAP__self.KeepOrder(SAP__self.OrderItemType)/Justification">
+                <Annotation Term="SAP__common.Label" String="Justification Text"/>
             </Annotations>
         </Schema>
     </edmx:DataServices>
